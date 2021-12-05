@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.OracleClient;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace Factura
 
         OracleConnection conexion = new OracleConnection("DATA SOURCE = xe ; PASSWORD = 123 ; USER ID = nicolas");
 
+     
         private void cmbProducto_SelectedIndexChanged(object sender, EventArgs e)
         {
             int cod;
@@ -139,6 +141,18 @@ namespace Factura
 
         private void btnVender_Click(object sender, EventArgs e)
         {
+            conexion.Open();
+            OracleCommand comando = new OracleCommand("SP_insertar_factura", conexion);
+            comando.CommandType = System.Data.CommandType.StoredProcedure;
+            comando.Parameters.Add("Nmesa", OracleType.Int32).Value = cmbmesas.Text;
+            comando.Parameters.Add("Ffactura", OracleType.DateTime).Value = DateTime.Now;
+            comando.Parameters.Add("Tpedido", OracleType.Int32).Value = lblTotatlPagar.Text;
+            comando.Parameters.Add("Dev", OracleType.Int32).Value = lblDevolucion.Text;
+            comando.Parameters.Add("Pago", OracleType.Int32).Value = txtEfectivo.Text;
+            comando.ExecuteNonQuery();
+
+            conexion.Close();
+
             clsFactura.CreaTicket Ticket1 = new clsFactura.CreaTicket();
 
             Ticket1.TextoCentro("Empresa SIA"); //imprime una linea de descripcion
@@ -153,7 +167,7 @@ namespace Factura
             clsFactura.CreaTicket.LineasGuion();
 
             clsFactura.CreaTicket.EncabezadoVenta();
-           clsFactura.CreaTicket.LineasGuion();
+            clsFactura.CreaTicket.LineasGuion();
             foreach (DataGridViewRow r in dgvLista.Rows)
             {
                 // PROD                     //PrECIO                                    CANT                         TOTAL
@@ -182,6 +196,8 @@ namespace Factura
 
             MessageBox.Show("Gracias por preferirnos");
 
+            
+
             this.Close();
         }
 
@@ -192,16 +208,22 @@ namespace Factura
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
+            OracleCommand comando2 = new OracleCommand("select NUMERO_MESA from MESA", conexion);
             OracleCommand comando = new OracleCommand("select * from RECETA", conexion);
             conexion.Open();
             OracleDataReader dr = comando.ExecuteReader();
+            OracleDataReader dr2 = comando2.ExecuteReader();
             while (dr.Read())
             {
                 cmbProducto.Items.Add(dr.GetString(1));
+           
+            }   
+
+            while (dr2.Read())
+            {
+                cmbmesas.Items.Add(dr2["NUMERO_MESA"].ToString());
             }
             conexion.Close();
-
         }
 
      
@@ -212,6 +234,12 @@ namespace Factura
 
             ventana2.Show();
         }
+
+
+
+
+
+       
     }
 
    

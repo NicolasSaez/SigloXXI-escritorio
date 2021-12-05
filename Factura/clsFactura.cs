@@ -234,6 +234,10 @@ namespace Factura
                 RawPrinterHelper.SendStringToPrinter(stringimpresora, line.ToString());
                 line = new StringBuilder();
 
+                
+                
+             
+
             }
         }
 
